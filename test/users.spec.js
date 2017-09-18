@@ -13,28 +13,28 @@ chai.use(chaiHttp)
 
 // Mock sandbox
 var sandbox = Sinon.sandbox.create()
-  , test_user = {
-      verify_token: null
-    }
-  , genRandomString = (length) => {
-      return crypto.randomBytes(Math.ceil(length/2))
-        .toString('hex') /** convert to hexadecimal format */
-        .slice(0,length)   /** return required number of characters */
-    }
-  , sha512 = (password, salt) => {
-      var hash = crypto.createHmac('sha512', salt) /** Hashing algorithm sha512 */
-      hash.update(password)
-      var value = hash.digest('hex')
-      return {
-        salt:salt,
-        passwordHash:value
-      }
-    }
-  , saltHashPassword = (userpassword) => {
-      var salt = genRandomString(16) /** Gives us salt of length 16 */
-      var passwordData = sha512(userpassword, salt)
-      return passwordData
-    }
+
+var genRandomString = function(length){
+  return crypto.randomBytes(Math.ceil(length/2))
+    .toString('hex') /** convert to hexadecimal format */
+    .slice(0,length);   /** return required number of characters */
+};
+
+var sha512 = function(password, salt){
+  var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
+  hash.update(password);
+  var value = hash.digest('hex');
+  return {
+    salt:salt,
+    passwordHash:value
+  };
+};
+
+function saltHashPassword(userpassword) {
+  var salt = genRandomString(16); /** Gives us salt of length 16 */
+  var passwordData = sha512(userpassword, salt);
+  return passwordData;
+}
 
 mailgunSendSpy = sandbox.stub().yields(null, { bo: 'dy' })
 sandbox.stub(Mailgun({ apiKey: 'foo', domain: 'bar' }).Mailgun.prototype, 'messages').returns({
