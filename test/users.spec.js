@@ -1,7 +1,6 @@
 process.env.NODE_ENV = 'test'
 
-let mongo = require('mongodb')
-  , ObjectID = mongo.ObjectID
+var mongo = require('mongodb')
   , chai = require('chai')
   , chaiHttp = require('chai-http')
   , server = require('../server')
