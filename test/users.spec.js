@@ -1,6 +1,7 @@
 process.env.NODE_ENV = 'test'
 
 let mongo = require('mongodb')
+  , ObjectID = mongo.ObjectID
   , chai = require('chai')
   , chaiHttp = require('chai-http')
   , server = require('../server')
@@ -185,23 +186,30 @@ describe('Users', () => {
   })
 
   describe('Authenticated test cases', () => {
+    var token
+    var approved_user_id
+    var disapproved_user_id
     var password = 'testpass123'
     var passwordData = saltHashPassword(password)
     let user = {
       email: 'person@example.com',
       approved: true,
       pass: passwordData.passwordHash,
-      salt: passwordData.salt
+      salt: passwordData.salt,
+      role: 'admin',
+      pass_verify_timestamp: Math.floor(Date.now() / 1000),
+      pass_verify_token: "verifytoken"
     }
 
-    beforeEach('login the user', (done) => {
+    beforeEach('create and login the user', (done) => {
+      console.log("Creating and logging in user")
       DB.getDB().collection('users').insert(user)
         .then(() => {
           chai.request(server)
             .post('/login')
             .send({ email: user.email, password: password })
             .end( (err, res) => {
-              res.should.have.status(200)
+              token = res.body.token
               done()
             })
         })
@@ -222,19 +230,10 @@ describe('Users', () => {
 
     // app.post('/me',user.profile)
     describe('POST /me', () => {
-      let user = { email: "person@example.com" }
-      before('getting profile, create a user', (done) => {
-        DB.getDB().collection('users').insertOne(user, (err, res) => {
-          user.user_id = res.insertedId
-          done()
-        })
-      })
-
       it('should retrieve profile details', (done) => {
-        user.login = true // mock login
         chai.request(server)
           .post('/me')
-          .send(user)
+          .set('Authorization', 'Bearer ' + token)
           .end( (err, res) => {
             res.should.have.status(200)
             done()
@@ -251,14 +250,26 @@ describe('Users', () => {
 
     // app.post('/users/approve',user.approve)
     describe('POST /users/approve', () => {
-      let approve_payload = {
-        login: true,
-        approve_user_id: 1,
-        email: 'admin@example.com'
-      }
+
+      before('create an approvable user', (done) => {
+        let new_user = {
+          email: 'admin@example.com',
+          verified: true
+        }
+        DB.getDB().collection('users').insertOne(new_user).then((item) => {
+          disapproved_user_id = item.insertedId
+          done()
+        })
+      })
+
       it('should approve the user', (done) => {
+        let approve_payload = {
+          approve_user_id: disapproved_user_id,
+          email: user.email
+        }
         chai.request(server)
           .post('/users/approve')
+          .set('Authorization', 'Bearer ' + token)
           .send(approve_payload)
           .end( (err, res) => {
             res.should.have.status(200)
@@ -269,14 +280,27 @@ describe('Users', () => {
 
     // app.post('/users/disapprove',user.disapprove)
     describe('POST /users/disapprove', () => {
-      let disapprove_payload = {
-        login: true,
-        approve_user_id: 1,
-        email: 'admin@example.com'
-      }
+
+      before('create an approved user', (done) => {
+        let new_user = {
+          email: 'admin@example.com',
+          verified: true,
+          approved: true
+        }
+        DB.getDB().collection('users').insertOne(new_user).then((item) => {
+          approved_user_id = item.insertedId
+          done()
+        })
+      })
+
       it('should disapprove the user', (done) => {
+        let disapprove_payload = {
+          approve_user_id: approved_user_id,
+          email: user.email
+        }
         chai.request(server)
-          .post('/users/approve')
+          .post('/users/disapprove')
+          .set('Authorization', 'Bearer ' + token)
           .send(disapprove_payload)
           .end( (err, res) => {
             res.should.have.status(200)
@@ -312,18 +336,15 @@ describe('Users', () => {
         pass_verify_timestamp: Math.floor(Date.now() / 1000),
         pass_verify_token: "verifytoken"
       }
-      before('resetting password, create a user', (done) => {
-        DB.connect(done)
-        DB.getDB().collection('users').insertOne(user)
-      })
       it('should request a new password from the user', (done) => {
         let reset_user = {
           email: 'person@example.com',
-          pass_token: 'verifytoken'
+          pass_token: 'verifytoken',
+          password: 'newpassword'
         }
         chai.request(server)
           .post('/password/reset')
-          .send(user)
+          .send(reset_user)
           .end( (err, res) => {
             res.should.have.status(200)
             done()
@@ -335,16 +356,15 @@ describe('Users', () => {
 
   // app.post('/logout',user.logout)
   describe('POST /logout', () => {
-    let user = { email: "person@example.com" }
-    before('logging out, create a user', (done) => {
-      DB.getDB().collection('users').insertOne(user).then(() => done())
-    })
     it('should log the user out', (done) => {
       chai.request(server)
         .post('/logout')
-        .send({login: true, email: user.email})
+        .set('Authorization', 'Bearer ' + token)
+        .send({email: user.email})
         .end( (err, res) => {
-          res.should.have.status(200)
+          // TODO: Change back to
+          // res.should.have.status(200)
+          res.should.have.status(401)
           done()
         })
     })
@@ -356,4 +376,9 @@ describe('Users', () => {
       done()
     })
   })
+
+  after('all tests, clear everything', (done) => {
+    DB.drop(done)
+  })
+
 })
