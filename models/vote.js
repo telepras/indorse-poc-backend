@@ -1,4 +1,5 @@
 var mongo = require('mongodb');
+var process = require('process');
 var config = require('config');
 var auth = require('./auth.js');
 var score_token = require('./score_token.js');
@@ -7,7 +8,6 @@ var Server = mongo.Server,
     BSON = mongo.BSONPure;
 ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
-var server = new Server(config.get('DBHost'),config.get('DBPort'), {auto_reconnect: true});
 // var db = new Db(config.get('DBName'), server);
 // db.open(function(err, db) {
 //     if(!err) {
@@ -22,7 +22,7 @@ var server = new Server(config.get('DBHost'),config.get('DBPort'), {auto_reconne
 const MongoClient = mongo.MongoClient
 var db;
 
-MongoClient.connect(config.get('poc_mongo'), function(err, database) {
+MongoClient.connect(process.env.POC_MONGO, function(err, database) {
     if (err) return console.log(err);
     db = database;
 });

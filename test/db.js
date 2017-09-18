@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient
   , async = require('async')
   , config = require('config')
-
+var process = require('process');
 var state = {
   db: null
 }
@@ -9,7 +9,7 @@ var state = {
 exports.connect = (done) => {
   if (state.db) return done()
 
-  var uri = config.get('poc_mongo')
+  var uri = process.env.POC_MONGO
 
   MongoClient.connect(uri, (err, db) => {
     if (err) return done(err)

@@ -1,4 +1,5 @@
 var mongo = require('mongodb');
+var process = require('process');
 var config = require('config');
 var auth = require('./auth.js');
 var Server = mongo.Server,
@@ -6,12 +7,26 @@ var Server = mongo.Server,
     BSON = mongo.BSONPure;
     ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
-var server = new Server(config.get('DBHost'),config.get('DBPort'), {auto_reconnect: true});
-var db = new Db(config.get('DBName'), server);
 var passwordHash = require('password-hash');
 var randtoken = require('rand-token');
 var crypto = require('crypto');
-var mailgun_params = config.get('mailgun_params');
+var mailgun_key = process.env.MAILGUN_API_KEY
+var mailgun_domain = process.env.MAILGUN_DOMAIN
+
+if(mailgun_key == null) {
+  console.log("Please add MAILGUN_API_KEY environment variable and then restart the app")
+  process.exit(1)
+}
+if(mailgun_domain == null) {
+  console.log("Please add MAILGUN_DOMAIN environment variable and then restart the app")
+  process.exit(1)
+}
+
+var mailgun_params = {
+  apiKey: mailgun_key,
+  domain: mailgun_domain
+}
+
 var mailgun = require('mailgun-js')(mailgun_params);
 
 // db.open(function(err, db) {
@@ -26,7 +41,7 @@ var mailgun = require('mailgun-js')(mailgun_params);
 const MongoClient = mongo.MongoClient;
 var db;
 
-MongoClient.connect(config.get('poc_mongo'), function(err, database) {
+MongoClient.connect(process.env.POC_MONGO, function(err, database) {
     if (err) return console.log(err);
     db = database;
 });

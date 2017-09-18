@@ -6,7 +6,7 @@ var Server = mongo.Server,
     BSON = mongo.BSONPure;
     ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
-var server = new Server(config.get('DBHost'),config.get('DBPort'), {auto_reconnect: true});
+var process = require('process');
 // var db = new Db(config.get('DBName'), server);
 
 
@@ -23,7 +23,7 @@ var server = new Server(config.get('DBHost'),config.get('DBPort'), {auto_reconne
 const MongoClient = mongo.MongoClient
 var db;
 
-MongoClient.connect(config.get('poc_mongo'), function(err, database) {
+MongoClient.connect(process.env.POC_MONGO, function(err, database) {
     if (err) return console.log(err);
     db = database;
 });
@@ -52,7 +52,7 @@ module.exports = function(req,res,next){
                 if(item)
                 {
                     //console.log('Token not found for the user')
-                    jwt.verify(token,config.get('jwtsecret'), function(err, decoded) {
+                    jwt.verify(token,process.env.JWT_SECRET, function(err, decoded) {
                         if (err) {
                             console.log('JWT verification failed')
                             req.body.login = false;

@@ -1,15 +1,30 @@
 var mongo = require('mongodb');
+var process = require('process');
 var config = require('config');
 var Server = mongo.Server,
     Db = mongo.Db,
     BSON = mongo.BSONPure;
     ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
-var server = new Server(config.get('DBHost'),config.get('DBPort'), {auto_reconnect: true});
 var passwordHash = require('password-hash');
 var randtoken = require('rand-token');
 var crypto = require('crypto');
-var mailgun_params = config.get('mailgun_params');
+var mailgun_key = process.env.MAILGUN_API_KEY
+var mailgun_domain = process.env.MAILGUN_DOMAIN
+
+if(mailgun_key == null) {
+  console.log("Please add MAILGUN_API_KEY environment variable and then restart the app")
+  process.exit(1)
+}
+if(mailgun_domain == null) {
+  console.log("Please add MAILGUN_DOMAIN environment variable and then restart the app")
+  process.exit(1)
+}
+
+var mailgun_params = {
+  apiKey: mailgun_key,
+  domain: mailgun_domain
+}
 var mailgun = require('mailgun-js')(mailgun_params);
 // var db = new Db(config.get('DBName'), server);
 
@@ -26,7 +41,7 @@ var mailgun = require('mailgun-js')(mailgun_params);
 const MongoClient = mongo.MongoClient
 var db;
 
-MongoClient.connect(config.get('poc_mongo'), function(err, database) {
+MongoClient.connect(process.env.POC_MONGO, function(err, database) {
     if (err) return console.log(err);
     db = database;
 });
@@ -261,7 +276,7 @@ exports.passwordReset = function(req,res){
                         delete user_item['pass'];
                         delete user_item['salt'];
                         delete user_item['tokens'];
-                        var token = jwt.sign(user_item,config.get('jwtsecret'), {
+                        var token = jwt.sign(user_item,process.env.JWT_SECRET, {
                             expiresIn : 60*60*24*31 // expires in 31 days
                         });
                         if(!('tokens' in item))
@@ -360,7 +375,7 @@ exports.verify = function(req,res){
 				delete user_item['pass'];
 				delete user_item['salt'];
 				delete  ['tokens'];
-				//var token = jwt.sign(user_item,config.get('jwtsecret'), {
+				//var token = jwt.sign(user_item,process.env.JWT_SECRET, {
                 //                       expiresIn : 60*60*24*31 // expires in 31 days
                 //                });
 				if(!('tokens' in item))
@@ -470,7 +485,7 @@ exports.login = function(req,res){
                 delete user_item['pass'];
                 delete user_item['salt'];
                 delete user_item['tokens'];
-			    var token = jwt.sign(user_item,config.get('jwtsecret'), {
+			    var token = jwt.sign(user_item,process.env.JWT_SECRET, {
                                         expiresIn : 60*60*24*31 // expires in 31 days
                 });
                 if(!('tokens' in item))
