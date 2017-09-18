@@ -1,5 +1,7 @@
 # Indorse POC backend
 
+[![TravisCI Status](https://travis-ci.org/telepras/indorse-poc-backend.svg?branch=master)](https://travis-ci.org/telepras/indorse-poc-backend)
+
 > Please note that this codebase is a Work In Progress (WIP), and will soon be ready for the alpha release. Hence we won't be accepting any pull requests until that time.
 
 What is this POC about?
