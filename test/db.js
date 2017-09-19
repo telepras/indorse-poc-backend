@@ -1,7 +1,6 @@
 var MongoClient = require('mongodb').MongoClient
   , async = require('async')
   , config = require('config')
-var process = require('process');
 var state = {
   db: null
 }

@@ -1,5 +1,4 @@
 var mongo = require('mongodb');
-var process = require('process');
 var config = require('config');
 var auth = require('./auth.js');
 var Server = mongo.Server,

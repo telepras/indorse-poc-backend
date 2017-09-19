@@ -6,7 +6,6 @@ var Server = mongo.Server,
     BSON = mongo.BSONPure,
     ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
-var process = require('process');
 // var db = new Db(config.get('DBName'), server);
 
 

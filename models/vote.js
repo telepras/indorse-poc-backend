@@ -1,5 +1,4 @@
 var mongo = require('mongodb');
-var process = require('process');
 var config = require('config');
 var auth = require('./auth.js');
 var score_token = require('./score_token.js');
