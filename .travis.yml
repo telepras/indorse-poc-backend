@@ -1,4 +1,7 @@
 language: node_js
+node_js:
+  - "6"
+  - "4"
 env:
   global:
   - POC_MONGO=mongodb:\/\/travis:test@localhost:27017/poc_dev
