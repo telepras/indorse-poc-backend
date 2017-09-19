@@ -36,17 +36,19 @@ var sandbox = Sinon.sandbox.create()
       return passwordData
     }
 
-mailgunSendSpy = sandbox.stub().yields(null, { bo: 'dy' })
+var mailgunSendSpy = sandbox.stub().yields(null, { bo: 'dy' })
 sandbox.stub(Mailgun({ apiKey: 'foo', domain: 'bar' }).Mailgun.prototype, 'messages').returns({
   send: mailgunSendSpy
 })
 
 describe('Users', () => {
   before((done) => {
+    console.log('connecting database')
     DB.connect(done)
   })
 
   afterEach((done) => {
+    console.log('dropping database')
     DB.drop(done)
   })
   // app.post('/signup',user.signup)
@@ -56,7 +58,7 @@ describe('Users', () => {
       let user = {
         email: "p@example.com"
       }
-      users = DB.getDB().collection('users')
+      let users = DB.getDB().collection('users')
       users.insertOne(user)
         .then(() => done())
     })
@@ -109,7 +111,7 @@ describe('Users', () => {
           res.should.have.status(200)
           res.body.should.be.a('object')
           res.body.message.should.equal('Verification email sent successfully')
-          users = DB.getDB().collection('users')
+          let users = DB.getDB().collection('users')
           users.findOne({email: user.email})
             .then((item) => {
               item.name.should.equal(user.name)
@@ -185,25 +187,26 @@ describe('Users', () => {
   })
 
   describe('Authenticated test cases', () => {
-    var token
-    var approved_user_id
-    var disapproved_user_id
+    var token, approved_user_id, disapproved_user_id, user
     var password = 'testpass123'
-    var passwordData = saltHashPassword(password)
-    let user = {
-      email: 'person@example.com',
-      approved: true,
-      pass: passwordData.passwordHash,
-      salt: passwordData.salt,
-      role: 'admin',
-      pass_verify_timestamp: Math.floor(Date.now() / 1000),
-      pass_verify_token: "verifytoken"
-    }
 
     beforeEach('create and login the user', (done) => {
-      console.log("Creating and logging in user")
-      DB.getDB().collection('users').insert(user)
-        .then(() => {
+      console.log("creating and logging in user")
+      let passwordData = saltHashPassword(password)
+      user = {
+        email: 'person@example.com',
+        approved: true,
+        verified: true,
+        pass: passwordData.passwordHash,
+        salt: passwordData.salt,
+        role: 'admin',
+        pass_verify_timestamp: Math.floor(Date.now() / 1000),
+        pass_verify_token: "verifytoken"
+      }
+      DB.getDB().collection('users').insertOne(user)
+        .then((res) => {
+          if('insertedCount' in res && res.insertedCount === 1) console.log('user created')
+          console.log('now trying to log in for authenticated test cases')
           chai.request(server)
             .post('/login')
             .send({ email: user.email, password: password })
@@ -215,7 +218,7 @@ describe('Users', () => {
     })
 
     // app.post('/login',user.login)
-    describe('POST /login', () => {
+    describe('POST /login for user login', () => {
       it('should log the user in', (done) => {
         chai.request(server)
           .post('/login')
@@ -351,22 +354,20 @@ describe('Users', () => {
       })
     })
 
-  })
-
-  // app.post('/logout',user.logout)
-  describe('POST /logout', () => {
-    it('should log the user out', (done) => {
-      chai.request(server)
-        .post('/logout')
-        .set('Authorization', 'Bearer ' + token)
-        .send({email: user.email})
-        .end( (err, res) => {
-          // TODO: Change back to
-          // res.should.have.status(200)
-          res.should.have.status(401)
-          done()
-        })
+    // app.post('/logout',user.logout)
+    describe('POST /logout', () => {
+      it('should log the user out', (done) => {
+        chai.request(server)
+          .post('/logout')
+          .set('Authorization', 'Bearer ' + token)
+          .send({email: user.email})
+          .end( (err, res) => {
+            res.should.have.status(200)
+            done()
+          })
+      })
     })
+
   })
 
   // app.post('/password/change',user.passwordChange)

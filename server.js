@@ -1,11 +1,11 @@
 var express = require('express');
-var app = express();
-user = require('./models/users');
-claim = require('./models/claims');
-auth = require('./models/auth');
-vote = require('./models/vote');
-score = require('./models/score_token');
-bearerToken = require('express-bearer-token');
+var app = express(),
+    user = require('./models/users'),
+    claim = require('./models/claims'),
+    auth = require('./models/auth'),
+    vote = require('./models/vote'),
+    score = require('./models/score_token'),
+    bearerToken = require('express-bearer-token')
 var jwt    = require('jsonwebtoken');
 var config = require('config');
 

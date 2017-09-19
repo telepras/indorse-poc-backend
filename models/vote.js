@@ -5,8 +5,8 @@ var auth = require('./auth.js');
 var score_token = require('./score_token.js');
 var Server = mongo.Server,
     Db = mongo.Db,
-    BSON = mongo.BSONPure;
-ObjectID = mongo.ObjectID;
+    BSON = mongo.BSONPure,
+    ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
 // var db = new Db(config.get('DBName'), server);
 // db.open(function(err, db) {

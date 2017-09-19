@@ -3,7 +3,7 @@ var process = require('process');
 var config = require('config');
 var Server = mongo.Server,
     Db = mongo.Db,
-    BSON = mongo.BSONPure;
+    BSON = mongo.BSONPure,
     ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
 var passwordHash = require('password-hash');
@@ -213,8 +213,8 @@ exports.passwordForgot = function(req,res){
                                 }
                                 else
                                 {
-					name = item['name']
-					email = item['email']
+					var name = item['name']
+					var email = item['email']
 					//var msg_text = "Hello here is the forgot passsword link https://indorse-staging.herokuapp.com/password/reset?email=" + email + "&pass_token=" + pass_verify_token;
 					var msg_text = "Dear " + name + ", <br><br> We have received a request to reset your password.  If this request was not made by you, we suggest you ignore this email.  However, if you have made this request, we will require you to visit the following link to reset your password: <br><br> <a href='" + config.get('app_url')  + "password/reset?email=" + email + "&pass_token=" + pass_verify_token + "'>Password reset link</a> <br><br> Thank you and regards <br> Team Indorse <br><br> Please let us know if you have any problems or questions at: <br> www.indorse.io";
                     var sub_text = 'Your forgot password link from Indorse';
@@ -390,8 +390,8 @@ exports.verify = function(req,res){
 
 
 
-                        name = item['name']
-                    email = item['email']
+                    var name = item['name']
+                    var email = item['email']
                     //var msg_text = "Hello here is the forgot passsword link https://indorse-staging.herokuapp.com/password/reset?email=" + email + "&pass_token=" + pass_verify_token;
                     var msg_text = "Dear " + name + ", <br><br> Thank you for confirming your email address. As next steps, our team will quickly verify your registration request and will attempt to approve your login details at the earliest.  We will send you an email as soon as your login details are approved: <br><br> We look forward to your participation onto our platform.<br><br> Thank you and regards <br> Team Indorse <br><br> Please let us know if you have any problems or questions at: <br> www.indorse.io";
                     var sub_text = 'Your email verified';
@@ -433,7 +433,8 @@ exports.logout = function(req,res){
     var info = req.body;
     if('login' in info && info.login)
     {
-        token = info['token'];
+        var token = info['token'];
+        var email = info['email']
         db.collection('users',function(err,collection){
             collection.findOne({'email': email}, function(err, item) {
                 if(item) {
@@ -468,16 +469,17 @@ exports.login = function(req,res){
     var info = req.body;
 	if('email' in info && info['email'] != ''  && 'password' in info && info['password'] != '')
     {
-        email = info['email'];
-        password = info['password'];
+
+        var email = info['email'];
+        var password = info['password'];
 		db.collection('users',function(err,collection){
 		    collection.findOne({'email': email}, function(err, item) {
                 if(item)
                 {
             if('approved' in item && item['approved'])
             {
-			salt = item['salt'];
-			storedpass = item['pass'];
+			var salt = item['salt'];
+			var storedpass = item['pass'];
 			var passwordData = sha512(password, salt);
 			if(passwordData.passwordHash == storedpass)
 			{
@@ -528,7 +530,7 @@ exports.profile = function(req,res){
         var info = req.body;
         if('login' in req.body && req.body.login)
         {       
-                email = info['email'];
+                var email = info['email'];
                 db.collection('users',function(err,collection){
                 collection.findOne({'email': email}, function(err, item) {
                 if(item)
@@ -616,12 +618,12 @@ exports.approve = function(req,res){
         var info = req.body;
         if('login' in req.body && req.body.login)
         {
-                email = info['email'];
+                var email = info['email'];
                 db.collection('users',function(err,collection){
                         collection.findOne({'email': email,'role' : 'admin'}, function(err, item) {
                         if(item)
                         {
-                                approve_user_id = info['approve_user_id'];
+                                var approve_user_id = info['approve_user_id'];
                                 collection.findOne({'_id': new ObjectID(approve_user_id)}, function(err, item) {
                                 if(item)
                                 {
@@ -635,8 +637,8 @@ exports.approve = function(req,res){
                                                 }
                                                 else
                                                 {
-                                                        name = item['name']
-                                                        email = item['email']
+                                                        var name = item['name']
+                                                        var email = item['email']
                                                         //var msg_text = "Hello here is the forgot passsword link https://indorse-staging.herokuapp.com/password/reset?email=" + email + "&pass_token=" + pass_verify_token;
                                                         var msg_text = "Dear " + name + ", <br><br> Our team has reviewed and approved your login details. <br><br>You may now visit our website: Indorse.io and login with your email address and password that you set, while creating your account at Indose.io: <br><br> The Indorse Community looks forward to your positive participation.<br><br> Thank you and regards <br> Team Indorse <br><br> Please let us know if you have any problems or questions at: <br> www.indorse.io";
                                                         var sub_text = 'Your account has been approved';
@@ -683,14 +685,14 @@ exports.disapprove = function(req,res){
         var info = req.body;
         if('login' in req.body && req.body.login)
         {
-                email = info['email'];
+                var email = info['email'];
                 db.collection('users',function(err,collection){
                         collection.findOne({'email': email,'role' : 'admin'}, function(err, item) {
                         if(item)
                         {
 
                         //Log the person out and return success
-                                        approve_user_id = info['approve_user_id'];
+                                        var approve_user_id = info['approve_user_id'];
                                         collection.findOne({'_id': ObjectID(approve_user_id)}, function(err, item) {
                                         if(item)
                                         {

@@ -1,6 +1,7 @@
 var config = require('config');
 var Tx = require('ethereumjs-tx');
 var Web3 = require('web3');
+var web3
 
 if (typeof web3 !== 'undefined') {
     web3 = new Web3(web3.currentProvider);

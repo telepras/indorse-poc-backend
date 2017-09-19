@@ -3,7 +3,7 @@ var mongo = require('mongodb');
 var config = require('config');
 var Server = mongo.Server,
     Db = mongo.Db,
-    BSON = mongo.BSONPure;
+    BSON = mongo.BSONPure,
     ObjectID = mongo.ObjectID;
 var jwt    = require('jsonwebtoken');
 var process = require('process');
@@ -35,7 +35,7 @@ module.exports = function(req,res,next){
         var decoded = jwt.decode(req['token'], {complete: true});
         if(decoded && 'payload' in decoded && 'email' in decoded['payload'])
         {
-            email = decoded['payload']['email']
+            var email = decoded['payload']['email']
             req.body.email = email;
         }
         else
@@ -44,7 +44,7 @@ module.exports = function(req,res,next){
             next();
             return;
         }
-        token = req['token'];
+        var token = req['token'];
         req.body.token = token
         //console.log('email is ' + email + 'token is ' + token)
         db.collection('users',function(err,collection){
