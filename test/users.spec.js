@@ -59,7 +59,7 @@ describe('Users', function() {
   describe('/POST signup', function() {
 
     before(function(done) {
-      let user = {
+      var user = {
         email: "p@example.com"
       }
       users = DB.getDB().collection('users')
@@ -68,7 +68,7 @@ describe('Users', function() {
     })
 
     it('should return 404 if user exists', function(done) {
-      let user = {
+      var user = {
         name: 'Person',
         email: 'p@example.com',
         password: 'password'
@@ -86,7 +86,7 @@ describe('Users', function() {
     })
 
     it('should throw error if email or password is missing', function(done) {
-      let user = {
+      var user = {
         email: 'p@example.com'
       }
 
@@ -102,7 +102,7 @@ describe('Users', function() {
     })
 
     it('should create a new user in database if user is created successfully', function(done) {
-      let user = {
+      var user = {
         name: 'Another Person',
         email: 'person@another.com',
         password: 'password'
@@ -131,7 +131,7 @@ describe('Users', function() {
 
   // app.post('/resendverification',user.resendVerification)
   describe('POST /resendverification', function() {
-    let user = {
+    var user = {
       name: "Name",
       email: "person@example.com",
       verified: false
@@ -154,7 +154,7 @@ describe('Users', function() {
     })
 
     it('should give an error without email', function(done) {
-      let nothing = {}
+      var nothing = {}
       chai.request(server)
         .post('/resendverification')
         .send(nothing)
@@ -169,7 +169,7 @@ describe('Users', function() {
 
   // app.post('/verify-email',user.verify)
   describe('POST /verify-email', function() {
-    let user = {
+    var user = {
       email: "person@example.com",
       verify_token: "verificationtoken"
     }
@@ -196,7 +196,7 @@ describe('Users', function() {
     var disapproved_user_id
     var password = 'testpass123'
     var passwordData = saltHashPassword(password)
-    let user = {
+    var user = {
       email: 'person@example.com',
       approved: true,
       pass: passwordData.passwordHash,
@@ -257,7 +257,7 @@ describe('Users', function() {
     describe('POST /users/approve', function() {
 
       before('create an approvable user', function(done) {
-        let new_user = {
+        var new_user = {
           email: 'admin@example.com',
           verified: true
         }
@@ -268,7 +268,7 @@ describe('Users', function() {
       })
 
       it('should approve the user', function(done) {
-        let approve_payload = {
+        var approve_payload = {
           approve_user_id: disapproved_user_id,
           email: user.email
         }
@@ -287,7 +287,7 @@ describe('Users', function() {
     describe('POST /users/disapprove', function() {
 
       before('create an approved user', function(done) {
-        let new_user = {
+        var new_user = {
           email: 'admin@example.com',
           verified: true,
           approved: true
@@ -299,7 +299,7 @@ describe('Users', function() {
       })
 
       it('should disapprove the user', function(done) {
-        let disapprove_payload = {
+        var disapprove_payload = {
           approve_user_id: approved_user_id,
           email: user.email
         }
@@ -316,7 +316,7 @@ describe('Users', function() {
 
     // app.post('/password/forgot',user.passwordForgot)
     describe('POST /password/forgot', function() {
-      let user = {
+      var user = {
         email: 'person@example.com'
       }
       before('sending email, create a user', function(done) {
@@ -336,13 +336,13 @@ describe('Users', function() {
 
     // app.post('/password/reset',user.passwordReset)
     describe('POST /password/reset', function() {
-      let user = {
+      var user = {
         email: 'person@example.com',
         pass_verify_timestamp: Math.floor(Date.now() / 1000),
         pass_verify_token: "verifytoken"
       }
       it('should request a new password from the user', function(done) {
-        let reset_user = {
+        var reset_user = {
           email: 'person@example.com',
           pass_token: 'verifytoken',
           password: 'newpassword'
